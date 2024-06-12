@@ -1,0 +1,57 @@
+class PluralFiniteStateMachine:
+    def __init__(self):
+        self.states = {'S': self.start_state, 'C': self.consonant_state,
+                       'V': self.vowel_state, 'D': self.double_consonant_state}
+        self.current_state = self.states['S']
+        self.result = ""
+
+    def start_state(self, char):
+        if char.isalpha():
+            if char.lower() in ['a', 'e', 'i', 'o', 'u']:
+                return 'V'
+            else:
+                return 'C'
+        else:
+            return 'S'
+
+    def consonant_state(self, char):
+        if char.lower() in ['a', 'e', 'i', 'o', 'u']:
+            return 'V'
+        elif char == 'y':
+            return 'V'
+        elif char == 's':
+            return 'D'
+        else:
+            return 'C'
+
+    def vowel_state(self, char):
+        if char.lower() == 'y':
+            return 'V'
+        elif char.lower() == 's':
+            return 'D'
+        else:
+            return 'V'
+
+    def double_consonant_state(self, char):
+        if char.isalpha():
+            return 'C'
+        else:
+            return 'S'
+
+    def generate_plural(self, word):
+        for char in word:
+            next_state = self.current_state(char)
+            self.current_state = self.states[next_state]
+            self.result += char
+        if next_state == 'C' or next_state == 'D':
+            self.result += 's'
+        else:
+            self.result += 'es'
+
+        return self.result
+nouns = ['cat', 'dog', 'city', 'baby', 'church', 'box', 'watch', 'tax']
+fsm = PluralFiniteStateMachine()
+
+for noun in nouns:
+    print(f"{noun} -> {fsm.generate_plural(noun)}")
+
