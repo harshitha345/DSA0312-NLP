@@ -1,0 +1,111 @@
+import numpy as np
+
+# Example training dataset
+training_data = [
+    ("the cat sleeps", ["DET", "NOUN", "VERB"]),
+    ("the dog barks", ["DET", "NOUN", "VERB"]),
+    ("a cat eats", ["DET", "NOUN", "VERB"])
+]
+
+# Function to calculate probabilities
+def train_hmm(training_data):
+    # Dictionaries to hold the counts
+    transition_counts = {}
+    emission_counts = {}
+    tag_counts = {}
+    
+    for sentence, tags in training_data:
+        words = sentence.split()
+        for i in range(len(words)):
+            word = words[i]
+            tag = tags[i]
+            
+            # Update emission counts
+            if tag not in emission_counts:
+                emission_counts[tag] = {}
+            if word not in emission_counts[tag]:
+                emission_counts[tag][word] = 0
+            emission_counts[tag][word] += 1
+            
+            # Update transition counts
+            if i > 0:
+                prev_tag = tags[i - 1]
+                if prev_tag not in transition_counts:
+                    transition_counts[prev_tag] = {}
+                if tag not in transition_counts[prev_tag]:
+                    transition_counts[prev_tag][tag] = 0
+                transition_counts[prev_tag][tag] += 1
+            
+            # Update tag counts
+            if tag not in tag_counts:
+                tag_counts[tag] = 0
+            tag_counts[tag] += 1
+    
+    # Convert counts to probabilities
+    transition_probs = {}
+    for prev_tag in transition_counts:
+        transition_probs[prev_tag] = {}
+        total = sum(transition_counts[prev_tag].values())
+        for tag in transition_counts[prev_tag]:
+            transition_probs[prev_tag][tag] = transition_counts[prev_tag][tag] / total
+    
+    emission_probs = {}
+    for tag in emission_counts:
+        emission_probs[tag] = {}
+        total = sum(emission_counts[tag].values())
+        for word in emission_counts[tag]:
+            emission_probs[tag][word] = emission_counts[tag][word] / total
+    
+    initial_probs = {tag: count / sum(tag_counts.values()) for tag, count in tag_counts.items()}
+    
+    return initial_probs, transition_probs, emission_probs
+
+# Train the HMM
+initial_probs, transition_probs, emission_probs = train_hmm(training_data)
+# Viterbi algorithm for POS tagging
+def viterbi(words, initial_probs, transition_probs, emission_probs):
+    states = list(initial_probs.keys())
+    viterbi_matrix = np.zeros((len(states), len(words)))
+    backpointer = np.zeros((len(states), len(words)), dtype=int)
+
+    # Initialize base cases (t == 0)
+    for s in range(len(states)):
+        state = states[s]
+        if words[0] in emission_probs[state]:
+            viterbi_matrix[s, 0] = initial_probs[state] * emission_probs[state][words[0]]
+        else:
+            viterbi_matrix[s, 0] = initial_probs[state] * 0.0001  # Smoothing for unseen words
+        backpointer[s, 0] = 0
+
+    # Run Viterbi for t > 0
+    for t in range(1, len(words)):
+        for s in range(len(states)):
+            state = states[s]
+            max_tr_prob = viterbi_matrix[0, t-1] * transition_probs[states[0]].get(state, 0.0001)
+            prev_st_selected = 0
+            for prev_s in range(1, len(states)):
+                tr_prob = viterbi_matrix[prev_s, t-1] * transition_probs[states[prev_s]].get(state, 0.0001)
+                if tr_prob > max_tr_prob:
+                    max_tr_prob = tr_prob
+                    prev_st_selected = prev_s
+            max_prob = max_tr_prob * emission_probs[state].get(words[t], 0.0001)
+            viterbi_matrix[s, t] = max_prob
+            backpointer[s, t] = prev_st_selected
+
+    # The final step - backtrack
+    best_path_prob = max(viterbi_matrix[:, len(words) - 1])
+    best_path_pointer = np.argmax(viterbi_matrix[:, len(words) - 1])
+
+    best_path = []
+    for t in range(len(words) - 1, -1, -1):
+        best_path.insert(0, states[best_path_pointer])
+        best_path_pointer = backpointer[best_path_pointer, t]
+
+    return best_path
+
+# Test the Viterbi algorithm
+test_sentence = "the cat eats"
+words = test_sentence.split()
+pos_tags = viterbi(words, initial_probs, transition_probs, emission_probs)
+print(f"Sentence: {test_sentence}")
+print(f"POS Tags: {pos_tags}")
