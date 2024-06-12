@@ -1,0 +1,8 @@
+import re
+text = "Hello, my email is example@example.com and my phone number is 123-456-7890."
+email_regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+phone_regex = r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'
+emails = re.findall(email_regex, text)
+print("Email addresses found:", emails)
+phones = re.findall(phone_regex, text)
+print("Phone numbers found:", phones)
