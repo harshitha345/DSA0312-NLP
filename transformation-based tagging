@@ -1,0 +1,44 @@
+import re
+
+# Initial tagging function
+def initial_tagging(words):
+    return [(word, 'NOUN') for word in words]
+
+# Transformation rules
+rules = [
+    (r'\b(the|a|an)\b', 'DET'),  # Rule to tag determiners
+]
+
+# Apply transformation rules
+def apply_transformation_rules(tagged_sentence, rules):
+    for i, (word, tag) in enumerate(tagged_sentence):
+        for pattern, new_tag in rules:
+            if re.fullmatch(pattern, word):
+                tagged_sentence[i] = (word, new_tag)
+                break
+    return tagged_sentence
+
+# Function to tag a sentence
+def tag_sentence(sentence, rules):
+    words = sentence.split()
+    tagged_sentence = initial_tagging(words)
+    transformed_sentence = apply_transformation_rules(tagged_sentence, rules)
+    return transformed_sentence
+
+def main():
+    # Example sentences to tag
+    sentences = [
+        "the quick brown fox jumps over the lazy dog",
+        "a cat sleeps",
+        "the dog barks loudly",
+        "an active dog is happily running"
+    ]
+
+    for sentence in sentences:
+        tagged = tag_sentence(sentence, rules)
+        print(f"Sentence: {sentence}")
+        print("Tagged: ", tagged)
+        print()
+
+if __name__ == "__main__":
+    main()
