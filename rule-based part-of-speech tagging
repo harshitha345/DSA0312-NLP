@@ -1,0 +1,44 @@
+import re
+
+# Define the regex rules for each POS tag
+rules = [
+    (r'\bthe\b|\ba\b|\ban\b', 'DET'),  # Determiners
+    (r'\b\w+ing\b|\b\w+ed\b|\bsleeps\b|\bbarks\b|\beats\b', 'VERB'),  # Verbs
+    (r'\b\w+ly\b', 'ADV'),  # Adverbs
+    (r'\b\w+y\b|\b\w+ive\b', 'ADJ'),  # Adjectives
+    (r'\b\w+s\b|\bdog\b|\bcat\b|\bfox\b', 'NOUN'),  # Nouns
+]
+
+def tag_sentence(sentence):
+    words = sentence.split()
+    tagged_sentence = []
+
+    for word in words:
+        tagged = False
+        for pattern, tag in rules:
+            if re.fullmatch(pattern, word):
+                tagged_sentence.append((word, tag))
+                tagged = True
+                break
+        if not tagged:
+            tagged_sentence.append((word, 'UNKNOWN'))
+
+    return tagged_sentence
+
+def main():
+    # Example sentences to tag
+    sentences = [
+        "the quick brown fox jumps over the lazy dog",
+        "a cat sleeps",
+        "the dog barks loudly",
+        "an active dog is happily running"
+    ]
+
+    for sentence in sentences:
+        tagged = tag_sentence(sentence)
+        print(f"Sentence: {sentence}")
+        print("Tagged: ", tagged)
+        print()
+
+if __name__ == "__main__":
+    main()
