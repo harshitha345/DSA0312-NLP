@@ -1,0 +1,12 @@
+import nltk
+nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
+text = """
+Natural language processing (NLP) is a field of artificial intelligence in which computers analyze, understand, and derive meaning from human language in a smart and useful way. 
+By utilizing NLP, developers can organize and structure knowledge to perform tasks such as automatic summarization, translation, named entity recognition, relationship extraction, 
+sentiment analysis, speech recognition, and topic segmentation.
+"""
+tokens = nltk.word_tokenize(text)
+tagged_tokens = nltk.pos_tag(tokens)
+for token, tag in tagged_tokens:
+    print(f"{token}: {tag}")
