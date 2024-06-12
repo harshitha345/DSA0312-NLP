@@ -1,0 +1,23 @@
+states = {'q0', 'q1', 'q2'}
+accept_state = 'q2'
+transitions = {
+    ('q0', 'a'): 'q0',
+    ('q0', 'b'): 'q1',
+    ('q1', 'a'): 'q0',
+    ('q1', 'b'): 'q2',
+    ('q2', 'a'): 'q0',
+    ('q2', 'b'): 'q1'
+}
+current_state = 'q0'
+input_string = input("Enter a string: ")
+for char in input_string:
+        if (current_state, char) in transitions:
+            current_state = transitions[(current_state, char)]
+        else:
+            print("Invalid transition.")
+        break
+else:
+    if current_state == accept_state:
+        print("String accepted by the finite state automaton.")
+    else:
+        print("String not accepted by the finite state automaton.")
